@@ -248,3 +248,76 @@ centralization = sum_difference / maximum_possible
 print("Degree of each node:", degrees)
 print("Maximum Degree:", maximum_degree)
 print("Centralization:", centralization)
+
+
+
+
+Represent a network using single mode and double mode
+data. Compute the adjacency matrix, degree diagonal matrix,
+Laplacian matrix, transition probability matrix, and incidence
+matrix.
+
+# Import one mode/two mode dataset
+import pandas as pd
+import numpy as np
+
+# Reading csv file
+data = pd.read_csv('friendships.csv', index_col=0)
+print(data)
+
+# Removing headers names to get adjacency matrix itself which
+# will be integer value
+A = data.values
+labels = data.index.to_list()
+
+print("Adjacency matrix A \n", A)
+
+# Find degree of each node
+deg = np.sum(A, axis=1)
+print("Degree \n", deg)
+
+# Place degree values in diagonal in matrix
+D = np.diag(deg)
+print("Matrix after placing degree to diagonal D \n", D)
+
+# Find laplacian matrix by subtracting adjacency matrix from
+# degree matrix (L = D - A)
+L = D - A
+print("Laplacian matrix L \n", L)
+
+# Transition Probability matrix -> divide Adjacency matrix with degree value row-wise
+# for row wise just vchange degree from 1x4 to 4x1 matrix using np.newaxis
+degree = deg[:, np.newaxis]
+print("Degree 4x1 matrix \n", degree)
+
+P = A / degree
+
+# Replace NaN values with 0
+# P = np.nan_to_num(P, copy=True, nan=0.0)
+
+print("Transition probability matrix P \n", P)
+
+# To find incidence matrix first we have to find edgelist
+edgelist = []
+n_nodes = A.shape[0]
+
+for i in range(n_nodes):
+    for j in range(i + 1, n_nodes):  # Avoid duplicate edges and self-loops
+        if A[i, j] == 1:
+            edgelist.append((labels[i], labels[j]))
+
+print("Edgelist: ", edgelist)
+
+# Incidence Matrix
+n_edges = len(edgelist)
+incidence_matrix = np.zeros((n_nodes, n_edges), dtype=int)
+node_to_index = {label: i for i, label in enumerate(labels)}
+
+for col_idx, (node1, node2) in enumerate(edgelist):
+    row_idx1 = node_to_index[node1]
+    row_idx2 = node_to_index[node2]
+
+    incidence_matrix[row_idx1, col_idx] = 1
+    incidence_matrix[row_idx2, col_idx] = 1
+
+print("Incidence Matrix: \n", incidence_matrix)
